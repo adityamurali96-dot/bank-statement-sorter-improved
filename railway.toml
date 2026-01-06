@@ -4,5 +4,4 @@ dockerfilePath = "Dockerfile"
 
 [deploy]
 healthcheckPath = "/health"
-healthcheckTimeout = 600
-startCommand = "gunicorn --bind 0.0.0.0:$PORT --workers 1 --timeout 300 --preload app:app"
+healthcheckTimeout = 300

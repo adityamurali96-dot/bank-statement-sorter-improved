@@ -24,12 +24,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY . .
 
-# Expose port
-EXPOSE 8080
-
 # Set environment variables
-ENV PORT=8080
 ENV PYTHONUNBUFFERED=1
 
-# Run with gunicorn - single worker for faster startup
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "1", "--timeout", "300", "--preload", "app:app"]
+# Railway sets PORT dynamically, use shell form to expand variable
+CMD gunicorn --bind 0.0.0.0:${PORT:-8080} --workers 1 --timeout 300 app:app
