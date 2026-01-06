@@ -27,5 +27,5 @@ COPY . .
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
 
-# Railway sets PORT dynamically, use shell form to expand variable
-CMD gunicorn --bind 0.0.0.0:${PORT:-8080} --workers 1 --timeout 300 app:app
+# Use shell to expand PORT variable
+CMD ["/bin/sh", "-c", "gunicorn --bind 0.0.0.0:${PORT:-8080} --workers 1 --timeout 300 app:app"]
