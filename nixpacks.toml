@@ -1,0 +1,11 @@
+[phases.setup]
+nixPkgs = ["tesseract", "poppler_utils", "jdk11"]
+
+[phases.install]
+cmds = ["pip install -r requirements.txt"]
+
+[start]
+cmd = "gunicorn --bind 0.0.0.0:$PORT --workers 2 --timeout 300 app:app"
+
+[variables]
+PYTHONUNBUFFERED = "1"
