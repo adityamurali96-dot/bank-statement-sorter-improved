@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank Statement Sorter</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .upload-area {
+            border: 3px dashed #ddd;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: #fafafa;
+        }
+        
+        .upload-area:hover,
+        .upload-area.dragover {
+            border-color: #667eea;
+            background: #f0f3ff;
+        }
+        
+        .upload-icon {
+            font-size: 50px;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .upload-text {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        
+        .upload-hint {
+            color: #999;
+            font-size: 12px;
+        }
+        
+        #fileInput {
+            display: none;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 20px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .file-selected {
+            background: #e8f5e9;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .file-selected.show {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .file-icon {
+            font-size: 30px;
+            color: #4caf50;
+        }
+        
+        .file-info {
+            flex: 1;
+        }
+        
+        .file-name {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .file-size {
+            color: #666;
+            font-size: 12px;
+        }
+        
+        .remove-file {
+            background: #ff5252;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .progress-container {
+            display: none;
+            margin-top: 20px;
+        }
+        
+        .progress-container.show {
+            display: block;
+        }
+        
+        .progress-bar {
+            background: #eee;
+            border-radius: 10px;
+            height: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .progress-text {
+            text-align: center;
+            color: #666;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        
+        .result {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .result.show {
+            display: block;
+        }
+        
+        .result.success {
+            background: #e8f5e9;
+            border: 1px solid #4caf50;
+        }
+        
+        .result.error {
+            background: #ffebee;
+            border: 1px solid #f44336;
+        }
+        
+        .result-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+        
+        .result.success .result-icon {
+            color: #4caf50;
+        }
+        
+        .result.error .result-icon {
+            color: #f44336;
+        }
+        
+        .result-message {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .result-stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 15px;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .download-btn {
+            background: #4caf50;
+            margin-top: 10px;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid #eee;
+        }
+        
+        .feature {
+            text-align: center;
+        }
+        
+        .feature i {
+            font-size: 24px;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+        
+        .feature span {
+            display: block;
+            font-size: 12px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-file-invoice-dollar"></i> Bank Statement Sorter</h1>
+        <p class="subtitle">Upload PDF or Excel bank statements for automatic categorization</p>
+        
+        <div class="upload-area" id="uploadArea">
+            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+            <p class="upload-text">Drag & drop your file here</p>
+            <p class="upload-hint">or click to browse (PDF, XLS, XLSX, CSV)</p>
+            <input type="file" id="fileInput" accept=".pdf,.xls,.xlsx,.csv">
+        </div>
+        
+        <div class="file-selected" id="fileSelected">
+            <i class="fas fa-file-alt file-icon"></i>
+            <div class="file-info">
+                <div class="file-name" id="fileName"></div>
+                <div class="file-size" id="fileSize"></div>
+            </div>
+            <button class="remove-file" id="removeFile" title="Remove file">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <p class="progress-text" id="progressText">Processing...</p>
+        </div>
+        
+        <div class="result" id="result">
+            <i class="result-icon"></i>
+            <p class="result-message" id="resultMessage"></p>
+            <div class="result-stats" id="resultStats"></div>
+            <a id="downloadLink" style="display: none;">
+                <button class="btn download-btn">
+                    <i class="fas fa-download"></i> Download Excel Report
+                </button>
+            </a>
+        </div>
+        
+        <button class="btn" id="processBtn" disabled>
+            <i class="fas fa-cog"></i> Process Statement
+        </button>
+        
+        <div class="features">
+            <div class="feature">
+                <i class="fas fa-robot"></i>
+                <span>AI Categorization</span>
+            </div>
+            <div class="feature">
+                <i class="fas fa-file-pdf"></i>
+                <span>OCR Support</span>
+            </div>
+            <div class="feature">
+                <i class="fas fa-table"></i>
+                <span>Excel Export</span>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileSelected = document.getElementById('fileSelected');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const removeFile = document.getElementById('removeFile');
+        const processBtn = document.getElementById('processBtn');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+        const result = document.getElementById('result');
+        const resultMessage = document.getElementById('resultMessage');
+        const resultStats = document.getElementById('resultStats');
+        const downloadLink = document.getElementById('downloadLink');
+        
+        let selectedFile = null;
+        
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+        
+        function handleFile(file) {
+            const validTypes = ['.pdf', '.xls', '.xlsx', '.csv'];
+            const ext = '.' + file.name.split('.').pop().toLowerCase();
+            
+            if (!validTypes.includes(ext)) {
+                alert('Please upload a PDF, XLS, XLSX, or CSV file');
+                return;
+            }
+            
+            selectedFile = file;
+            fileName.textContent = file.name;
+            fileSize.textContent = formatFileSize(file.size);
+            fileSelected.classList.add('show');
+            processBtn.disabled = false;
+            result.classList.remove('show');
+        }
+        
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' bytes';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+        
+        removeFile.addEventListener('click', () => {
+            selectedFile = null;
+            fileInput.value = '';
+            fileSelected.classList.remove('show');
+            processBtn.disabled = true;
+        });
+        
+        processBtn.addEventListener('click', async () => {
+            if (!selectedFile) return;
+            
+            processBtn.disabled = true;
+            progressContainer.classList.add('show');
+            result.classList.remove('show');
+            
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            
+            // Simulate progress for large files
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress > 90) progress = 90;
+                progressFill.style.width = progress + '%';
+                progressText.textContent = progress < 30 ? 'Reading file...' : 
+                                          progress < 60 ? 'Extracting transactions...' :
+                                          'Categorizing...';
+            }, 500);
+            
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                clearInterval(progressInterval);
+                progressFill.style.width = '100%';
+                progressText.textContent = 'Complete!';
+                
+                const data = await response.json();
+                
+                setTimeout(() => {
+                    progressContainer.classList.remove('show');
+                    
+                    if (data.success) {
+                        result.className = 'result show success';
+                        result.querySelector('.result-icon').className = 'fas fa-check-circle result-icon';
+                        resultMessage.textContent = 'Statement processed successfully!';
+                        resultStats.innerHTML = `
+                            <div class="stat">
+                                <div class="stat-value">${data.transactions}</div>
+                                <div class="stat-label">Transactions</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value">${data.deposits}</div>
+                                <div class="stat-label">Deposits</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value">${data.withdrawals}</div>
+                                <div class="stat-label">Withdrawals</div>
+                            </div>
+                        `;
+                        downloadLink.href = '/download/' + data.filename;
+                        downloadLink.style.display = 'inline-block';
+                    } else {
+                        result.className = 'result show error';
+                        result.querySelector('.result-icon').className = 'fas fa-exclamation-circle result-icon';
+                        resultMessage.textContent = data.error || 'Processing failed';
+                        resultStats.innerHTML = '';
+                        downloadLink.style.display = 'none';
+                    }
+                    
+                    processBtn.disabled = false;
+                }, 500);
+                
+            } catch (error) {
+                clearInterval(progressInterval);
+                progressContainer.classList.remove('show');
+                result.className = 'result show error';
+                result.querySelector('.result-icon').className = 'fas fa-exclamation-circle result-icon';
+                resultMessage.textContent = 'Network error. Please try again.';
+                resultStats.innerHTML = '';
+                downloadLink.style.display = 'none';
+                processBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
